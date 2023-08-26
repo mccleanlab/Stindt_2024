@@ -1,12 +1,12 @@
 ## The following scripts were used to analyze data for Stindt et. al. 2023, and are organized here based on analysis function (which corresponds roughly to paper section). These utilize data that can be found at the Dryad repository for this paper:  
 
 
-# These following scripts were directly used to generate all figures in Stindt et. al. 2023:
+# The following scripts were directly used to generate all figures in Stindt et. al. 2023:
 
-"All_Plots.m" was used to generate all plotted data (besides modeling), using a master compiled data table "__Consolidated_Data.mat". Sections of the code correspond to Figure numbers.
-"Conjugation_TKCsweep.m" was used to generate Figure 4A using "__Conjugation_Clump_Data.mat" and "AllFits.mat".
-"Clumping_ParamSweeps.m" was used to generate Figures 4B,C using "__Conjugation_Clump_Data.mat" and "AllFits.mat".
-"Rescue_ParamSweeps.m" was used to generate Figure 6C using "__Conjugation_Clump_Data.mat" and "AllFits.mat".
+  - All_Plots.m was used to generate all plotted data (besides modeling), using a master compiled data table "__Consolidated_Data.mat". Sections of the code correspond to        Figure numbers.
+  - Conjugation_TKCsweep.m was used to generate Figure 4A using "__Conjugation_Clump_Data.mat" and "AllFits.mat".
+  - Clumping_ParamSweeps.m was used to generate Figures 4B,C using "__Conjugation_Clump_Data.mat" and "AllFits.mat".
+  - Rescue_ParamSweeps.m was used to generate Figure 6C using "__Conjugation_Clump_Data.mat" and "AllFits.mat".
 
 
 
