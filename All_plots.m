@@ -10,7 +10,7 @@ maxCit = max(AllData.Plate1.Citrine(AllData.Plate1.day>1));
 clear g;
 figure('position',[0 0 600 300]);
 
-g(1,1) = gramm('x',AllData.Plate1.day,'y',AllData.Plate1.Cherry./maxCh,...
+g(1,1) = gramm('x',AllData.Plate1.time,'y',AllData.Plate1.Cherry./maxCh,...
     'linestyle',AllData.Plate1.YeastFcn,'size',AllData.Plate1.YeastFcn,...
     'subset',(AllData.Plate1.Bacteria=='LeuA, TrpR' & ...
     AllData.Plate1.Yeast~='yMM1636' & AllData.Plate1.LW_Percent==15));
@@ -143,6 +143,7 @@ hr = heatmap([0 0.1 0.25; 1 0.08 0],'Colormap',Rleg);
 
 figure();
 hy = heatmap([0 0.1 0.25; 1 0.08 0],'Colormap',Yleg);
+
 %% F2B: Batch D:R ratios and TKC
 
 C.Plate1 = Complete(1).Plate3;
@@ -189,7 +190,7 @@ g(1,1) = gramm('x',Complete(1).All.logBYnormRatio,'y',Complete(1).All.logTKC,'co
     Complete(1).All.Plate==3));
 g(1,1).geom_point();
 % g(1,1).set_title('TKC by D:R ratio, day 7');
-g(1,1).set_names('x','log(D:R)','y','ln(IDC)','column','','row','Day ','color','Coculture Pair');
+g(1,1).set_names('x','ln(D:R)','y','ln(IDC)','column','','row','Day ','color','Coculture Pair');
 g(1,1).set_order_options('color',{'crossB_crossY','crossB_wtY','wtB_crossY','wtB_wtY'});
 
 g(1,1).update('color',Complete(1).All.Plate);
@@ -214,8 +215,8 @@ g(1,1) = gramm('x',Complete(1).All.logBYnormRatio,'y',Complete(1).All.logTKC,'co
     Complete(1).All.Plate==3 & Complete(1).All.TKC>=2));
 g(1,1).facet_grid(Complete(1).All.day,[]);
 g(1,1).geom_point();
-g(1,1).set_title('TKC by D:R ratio, day 7');
-g(1,1).set_names('x','log(D:R)','y','ln(TKC)','row','Day ');
+% g(1,1).set_title('IDC by D:R ratio, day 7');
+g(1,1).set_names('x','ln(D:R)','y','ln(IDC)','row','Day ');
 g(1,1).set_order_options('color',{'crossB_crossY','crossB_wtY','wtB_crossY','wtB_wtY'});
 
 g(1,1).update('color',Complete(1).All.Plate);
@@ -241,7 +242,7 @@ figure('position',[0 0 300 300]);
 g(1,1) = gramm('x',Slopes(:,4),'y',Slopes(:,1),'ymin',Slopes(:,2),'ymax',Slopes(:,3));
 g(1,1).stat_summary('geom','bar');
 g(1,1).geom_interval('geom','black_errorbar','dodge',0.8,'width',0);
-g(1,1).set_title('Fit slopes over time, ln(TKC) vs. ln(D:R)');
+% g(1,1).set_title('Fit slopes over time, ln(IDC) vs. ln(D:R)');
 g(1,1).set_names('x','Day','y','Slope');
 
 
@@ -272,16 +273,48 @@ g(1,1).facet_grid([],EndPoints.Plate23.Mannose);
 g(1,1).stat_summary('geom','line');
 g(1,1).geom_point('dodge',1);
 % g(1,2).axe_property('Yscale','log');
-g(1,1).set_title('Raw TKC Counts, 15% LW');
+% g(1,1).set_title('Raw TKC Counts, 15% LW');
 g(1,1).set_names('x','Day','y','CFU','color','Coculture Pair','column','Mannose');
 g(1,1).set_order_options('column',{'N','Y'},...
     'color',{'crossB_crossY','crossB_wtY','wtB_crossY','wtB_wtY'});
 
-g.set_title('Mannose Plates TKC');
+% g.set_title('Mannose Plates TKC');
 
 g.draw();
 
+%% F3B: Clumps TKC ALT for UWSP
 
+clear g;
+figure('position',[100 100 600 300]);
+
+EndPoints.Plate23 = Complete(1).Plate16.TecanData;
+
+maxCh = max(EndPoints.Plate23.Cherry(EndPoints.Plate23.day>0));
+maxCit = max(EndPoints.Plate23.Citrine(EndPoints.Plate23.day>0));
+
+EndPoints.Plate23.ChNorm = EndPoints.Plate23.Cherry ./ maxCh;
+EndPoints.Plate23.CitNorm = EndPoints.Plate23.Citrine ./ maxCit;
+EndPoints.Plate23.BYnormRatio = EndPoints.Plate23.ChNorm ./ EndPoints.Plate23.CitNorm;
+
+EndPoints.Plate23.TKCPerRatio = EndPoints.Plate23.TKC ./ EndPoints.Plate23.BYnormRatio;
+EndPoints.Plate23.TKCPerCitrine = EndPoints.Plate23.TKC ./ EndPoints.Plate23.Citrine;
+
+g(1,1) = gramm('x',EndPoints.Plate23.day,'y',EndPoints.Plate23.TKC,...
+    'color',EndPoints.Plate23.BactYeastPair,...
+    'subset',EndPoints.Plate23.PercLW==15 & (EndPoints.Plate23.YeastFcn=="crossY" &...
+    EndPoints.Plate23.BactFcn=="crossB"));
+g(1,1).facet_grid([],EndPoints.Plate23.Mannose);
+g(1,1).stat_summary('geom','line');
+g(1,1).geom_point('dodge',1);
+% g(1,2).axe_property('Yscale','log');
+g(1,1).set_title('Raw TKC Counts, 15% LW');
+g(1,1).set_names('x','Day','y','Yeasts with DNA','color','Coculture Pair','column','Mannose');
+g(1,1).set_order_options('column',{'N','Y'},...
+    'color',{'crossB_crossY','crossB_wtY','wtB_crossY','wtB_wtY'});
+
+g.set_title('Conjugated yeast, clumped vs. un-clumped cultures');
+
+g.draw();
 %% F3C: Clumps D:R
 
 
@@ -295,11 +328,11 @@ g(1,1) = gramm('x',Complete(1).Plate16.TecanData.PercLW,'y',Complete(1).Plate16.
 g(1,1).stat_summary('geom','bar','width',0.5);
 g(1,1).geom_interval('geom','black_errorbar','dodge',.6,'width',0);
 g(1,1).axe_property('YLim',[0 1]);
-g(1,1).set_title(["D:R ratio (normalized Cherry/Citrine)","crosB_wtY, day 6"]);
+% g(1,1).set_title(["D:R ratio (normalized Cherry/Citrine)","crosB_wtY, day 6"]);
 g(1,1).set_names('x','LW%','y',["Normalized mCherry /","Normalized ymCitrine"],'color','Mannose');
 g(1,1).set_order_options('x',[15 10 5 0],'color',{'Y','N'});
 
-g.set_title('Mannose Plates D:R');
+% g.set_title('Mannose Plates D:R');
 
 g.draw();
 
@@ -315,11 +348,11 @@ g(1,1) = gramm('x',Complete(1).Plate16.TecanData.PercLW,'y',Complete(1).Plate16.
 g(1,1).stat_summary('geom','bar','width',0.5);
 g(1,1).geom_interval('geom','black_errorbar','dodge',.6,'width',0);
 g(1,1).axe_property('YLim',[0 15]);
-g(1,1).set_title(["D:R ratio (normalized Cherry/Citrine)","crosB_wtY, day 6"]);
+% g(1,1).set_title(["D:R ratio (normalized Cherry/Citrine)","crosB_wtY, day 6"]);
 g(1,1).set_names('x','LW%','y',["Normalized mCherry /","Normalized ymCitrine"],'color','Mannose');
 g(1,1).set_order_options('x',[15 10 5 0],'color',{'Y','N'});
 
-g.set_title('Mannose Plates D:R');
+% g.set_title('Mannose Plates D:R');
 
 g.draw();
 
@@ -346,11 +379,11 @@ g(1,1).facet_grid(data.Perc_LW,[]);
 g(1,1).geom_point('dodge',0.6);
 g(1,1).geom_interval('geom','errorbar','dodge',0.6,'width',0);
 g(1,1).geom_hline('yintercept',ref);
-g(1,1).set_title('Colocalization over time, cis');
+% g(1,1).set_title('Colocalization over time, cis');
 g(1,1).set_names('x','Day','y','ICQ (colocalization)','color','Coculture Pair','row','LW%','column',[]);
 g(1,1).set_order_options('color',{'crossB_crossY','crossB_wtY','wtB_crossY','wtB_wtY'},'row',[100 0]);
 
-g.set_title('Li colocalization');
+% g.set_title('Li colocalization');
 
 g.draw();
 
@@ -376,7 +409,7 @@ g(1,1).set_order_options('color',{'crossB_crossY','crossB_wtY','wtB_crossY','wtB
 g(1,1).update('color',data.Perc_LW);
 g(1,1).stat_glm('disp_fit','true');
 
-g.set_title('Comparing Li colocalization to TKC');
+% g.set_title('Comparing Li colocalization to TKC');
 
 g.draw();
 
@@ -524,6 +557,62 @@ g(1,1).no_legend();
 
 g.draw();
 
+%% F7B: Growth (Yeast Only) alt orientation, no negs
+
+AllData.Plate1 = Complete(1).Plate15.TecanEndpoints;
+
+maxCh = max(AllData.Plate1.Cherry(AllData.Plate1.day>1));
+maxCit = max(AllData.Plate1.Citrine(AllData.Plate1.day>1));
+
+clear g;
+figure('position',[100 100 800 250]);
+g(1,1) = gramm('x',AllData.Plate1.day,'y',AllData.Plate1.Citrine./maxCit,...
+   'linestyle',AllData.Plate1.BactFcn,...
+   'subset',AllData.Plate1.YeastFcn=='crisprY' & AllData.Plate1.BactFcn~='nocutB' &...
+   AllData.Plate1.PercU==0);
+g(1,1).facet_grid([],AllData.Plate1.PercW);
+g(1,1).stat_summary('type','std');
+% g(1,1).geom_vline('xintercept',509335/3600);
+% g(1,1).set_title('Cutter donor');
+g(1,1).axe_property('YLim',[0 1]);
+g(1,1).set_names('x','Day','y','Normalized Yeast Count','column','W%','linestyle','Yeast Pairing');
+g(1,1).set_order_options('column',[15 10 5 1],'linestyle',{'cutB','nocutB','None'});
+g(1,1).set_line_options('base_size',2,'step_size',2,'styles',{'-','--',':'});
+g(1,1).set_color_options('map',[.7 .6 0],'legend','expand');
+g(1,1).no_legend();
+
+% g.set_title('CRISPR Yeast Growth (normalized)');
+
+g.draw();
+
+%% F7B: Growth (Yeast Only) alt for UWSP
+
+AllData.Plate1 = Complete(1).Plate15.TecanEndpoints;
+
+maxCh = max(AllData.Plate1.Cherry(AllData.Plate1.day>1));
+maxCit = max(AllData.Plate1.Citrine(AllData.Plate1.day>1));
+
+clear g;
+figure('position',[100 100 800 250]);
+g(1,1) = gramm('x',AllData.Plate1.day,'y',AllData.Plate1.Citrine./maxCit,...
+   'linestyle',AllData.Plate1.BactFcn,...
+   'subset',AllData.Plate1.YeastFcn=='crisprY' & AllData.Plate1.BactFcn~='nocutB' &...
+   AllData.Plate1.PercU==0);
+g(1,1).facet_grid([],AllData.Plate1.PercW);
+g(1,1).stat_summary('type','std');
+% g(1,1).geom_vline('xintercept',509335/3600);
+% g(1,1).set_title('Cutter donor');
+g(1,1).axe_property('YLim',[0 1]);
+g(1,1).set_names('x','Day','y','Normalized Yeast Count','linestyle','Yeast Pairing');
+g(1,1).set_order_options('column',[10 5],'linestyle',{'cutB','nocutB','None'});
+g(1,1).set_line_options('base_size',2,'step_size',2,'styles',{'-','--',':'});
+g(1,1).set_color_options('map',[.7 .6 0],'legend','expand');
+g(1,1).no_legend();
+
+% g.set_title('CRISPR Yeast Growth (normalized)');
+
+g.draw();
+
 %% F7C: CRISPR Fold depression Yeast
 % 
 % 
@@ -576,6 +665,33 @@ g(1,1).stat_summary('geom','point','dodge',0.4);
 g(1,1).geom_interval('geom','errorbar','dodge',0.4,'width',0);
 g(1,1).geom_vline('xintercept',6.5);
 g(1,1).axe_property('Ylim',[-8 .9]);
+% g(1,1).set_title('Change from monoculture, 0% Ura');
+g(1,1).set_names('x','Day','y',["Fold decrease","(Citrine)"],'color','Coculture Pair','row','W%','column','U%');
+g(1,1).set_order_options('row',[15 10 5 1],...
+    'color',{'cutB_crisprY','nocutB_crisprY'});
+
+% g.set_title('Comparing Fold-Loss of Yeast from Monoculture');
+
+g.draw();
+
+%% F7C alt: CRISPR Fold depression Yeast
+
+
+EndPoints.Plate1 = Complete(1).Plate15.TecanEndpoints;
+
+clear g;
+figure('position',[100 100 500 400]);
+
+g(1,1) = gramm('x',EndPoints.Plate1.day,'y',EndPoints.Plate1.FoldDecreaseMono,...
+    'ymin',EndPoints.Plate1.FDM_CImin,'ymax',EndPoints.Plate1.FDM_CImax,...
+    'color',EndPoints.Plate1.BactYeastPair,...
+    'subset',(EndPoints.Plate1.YeastFcn~="None" & EndPoints.Plate1.BactFcn~='nocutB' &...
+    EndPoints.Plate1.PercU==0));
+g(1,1).facet_grid(EndPoints.Plate1.PercW,[]);
+g(1,1).stat_summary('geom','bar','dodge',0.4);
+g(1,1).geom_interval('geom','errorbar','dodge',0.4,'width',0,'color','b');
+g(1,1).geom_vline('xintercept',6.5);
+g(1,1).axe_property('Ylim',[-8 .9]);
 g(1,1).set_title('Change from monoculture, 0% Ura');
 g(1,1).set_names('x','Day','y',["Fold decrease","(Citrine)"],'color','Coculture Pair','row','W%','column','U%');
 g(1,1).set_order_options('row',[15 10 5 1],...
@@ -599,16 +715,64 @@ g(1,1).facet_grid(EndPoints.Plate1.PercW,[]);
 g(1,1).stat_summary('geom','line');
 g(1,1).geom_point();
 g(1,1).geom_vline('xintercept',6.5);
-g(1,1).set_title('Raw TKC Counts');
+% g(1,1).set_title('Raw TKC Counts');
 g(1,1).set_names('x','Day','y','CFU','color','Coculture Pair','row','W%');
 g(1,1).set_order_options('row',[15 10 5 1],...
     'color',{'cutB_crisprY','nocutB_crisprY'});
 
 
-g.set_title('CRISPR TKC');
+% g.set_title('CRISPR TKC');
 
 g.draw();
 
+%% F7D: CRISPR TKC alt
+
+EndPoints.Plate1 = Complete(1).Plate15.TecanEndpoints;
+
+clear g;
+figure('position',[100 100 400 300]);
+
+g(1,1) = gramm('x',EndPoints.Plate1.day,'y',EndPoints.Plate1.TKC,...
+    'color',EndPoints.Plate1.BactYeastPair,'subset',(EndPoints.Plate1.YeastFcn~="None" &...
+    EndPoints.Plate1.BactFcn=="cutB" & EndPoints.Plate1.PercU==0 & EndPoints.Plate1.day>2 & EndPoints.Plate1.PercW==10));
+% g(1,1).facet_grid(EndPoints.Plate1.PercW,[]);
+g(1,1).stat_summary('geom','line');
+g(1,1).geom_point();
+g(1,1).geom_vline('xintercept',6.5);
+% g(1,1).set_title('Raw TKC Counts');
+g(1,1).set_names('x','Day','y','IDC count','color','Coculture Pair','row','W%');
+g(1,1).set_order_options('row',[15 10 5 1],...
+    'color',{'cutB_crisprY','nocutB_crisprY'});
+
+
+% g.set_title('CRISPR TKC');
+
+g.draw();
+
+
+%% F7D: CRISPR IDC, updated samples 240320
+
+clear g;
+
+C.Plate1 = Complete(1).Plate17;
+
+g(1,1) = gramm('x',C.Plate1.day,'y',C.Plate1.TKC,...
+    'color',C.Plate1.Smpl_Grp,'linestyle',C.Plate1.Mannose,'subset',(C.Plate1.YeastFcn~="None" &...
+    C.Plate1.BactFcn=="cutB"));
+g(1,1).facet_grid(C.Plate1.PercW,[]);
+% g(1,1).stat_summary();
+g(1,1).stat_summary('geom','line');
+g(1,1).geom_point();
+g(1,1).geom_vline('xintercept',6);
+g(1,1).set_names('x','Day','y','CFU','color','Sample Group','linestyle','Mannose','row','W%');
+g(1,1).set_order_options('row',[15 10 5 0],...
+    'color',{'A','B'},'linestyle',{'N','Y'});
+g(1,1).set_line_options('base_size',2,'step_size',2,'styles',{'-','--'});
+
+
+% g.set_title('IDC from cutter bacteria');
+
+g.draw();
 
 
 %% END OF BODY FIGURES
@@ -656,7 +820,7 @@ g(1,1) = gramm('x',Complete(1).All.day,'y',Complete(1).All.Bnormalized,...
      Complete(1).All.Plate==3));
 g(1,1).facet_grid(Complete(1).All.Perc_AA,[]);
 g(1,1).stat_summary('type','std');
-g(1,1).set_title('crossB_crossB');
+% g(1,1).set_title('crossB_crossB');
 g(1,1).set_names('x','Day','y','Normalized cells','linestyle','Coculture Pair','row','LW%','column',[]);
 g(1,1).set_order_options('row',[15 10 5 0],...
     'linestyle',{'crossY','None'},'size',{'None','crossY'});
@@ -683,7 +847,7 @@ g(1,2) = gramm('x',Complete(1).All.day,'y',Complete(1).All.Bnormalized,...
     Complete(1).All.day~=0 & Complete(1).All.Plate==3));
 g(1,2).facet_grid(Complete(1).All.Perc_AA,[]);
 g(1,2).stat_summary('type','std');
-g(1,2).set_title('crossB_wtY');
+% g(1,2).set_title('crossB_wtY');
 g(1,2).set_names('x','Day','y','Normalized cells','linestyle','Coculture Pair','row','LW%','column',[]);
 g(1,2).set_order_options('row',[15 10 5 0],'size',{'None','wtY'},...
     'linestyle',{'wtY','None'});
@@ -709,7 +873,7 @@ g(1,3) = gramm('x',Complete(1).All.day,'y',Complete(1).All.Bnormalized,...
     Complete(1).All.day~=0 & Complete(1).All.Plate==3);
 g(1,3).facet_grid(Complete(1).All.Perc_AA,[]);
 g(1,3).stat_summary('type','std');
-g(1,3).set_title('wtB_crossY');
+% g(1,3).set_title('wtB_crossY');
 g(1,3).set_names('x','Day','y','Normalized cells','linestyle','Coculture Pair','row','LW%','column',[]);
 g(1,3).set_order_options('row',[15 10 5 0],'size',{'None','crossY'},...
     'linestyle',{'crossY','None'});
@@ -734,7 +898,7 @@ g(1,4) = gramm('x',Complete(1).All.day,'y',Complete(1).All.Bnormalized,'linestyl
     Complete(1).All.day~=0 & Complete(1).All.Plate==3);
 g(1,4).facet_grid(Complete(1).All.Perc_AA,[]);
 g(1,4).stat_summary('type','std');
-g(1,4).set_title('wtB_wtY');
+% g(1,4).set_title('wtB_wtY');
 g(1,4).set_names('x','Day','y','Normalized cells','linestyle','Coculture Pair','row','LW%','column',[]);
 g(1,4).set_order_options('row',[15 10 5 0],'size',{'None','wtY'},...
     'linestyle',{'wtY','None'});
@@ -754,7 +918,7 @@ g(1,4).set_line_options('base_size',0.5,'step_size',2,'styles',{'-',':'});
 g(1,4).no_legend();
 
 
-g.set_title('Growth: All Cis Dynamics');
+% g.set_title('Growth: All Cis Dynamics');
 
 g.draw();
 
@@ -769,7 +933,7 @@ g(1,1) = gramm('x',Complete(1).All.logBYnormRatio,'y',Complete(1).All.logTKC,'co
     Complete(1).All.TKC>=2 & (Complete(1).All.Plate==3 |Complete(1).All.Plate==7)));
 g(1,1).facet_grid(Complete(1).All.day,Complete(1).All.Txfer);
 g(1,1).geom_point();
-g(1,1).set_title('Crossfeeding Cultures');
+% g(1,1).set_title('Crossfeeding Cultures');
 g(1,1).set_names('x','ln(D:R)','y','ln(IDC)','column','Transfer Type:','row','Day ');
 g(1,1).set_order_options('color',{'crossB_crossY','crossB_wtY','wtB_crossY','wtB_wtY'});
 g(1,1).no_legend;
@@ -785,7 +949,7 @@ g(1,2) = gramm('x',Complete(1).All.logBYnormRatio,'y',Complete(1).All.logTKC,'co
     Complete(1).All.TKC>=2));
 g(1,2).facet_grid(Complete(1).All.day,Complete(1).All.Txfer);
 g(1,2).geom_point();
-g(1,2).set_title('Crossfeeding Colonies');
+% g(1,2).set_title('Crossfeeding Colonies');
 g(1,2).set_names('x','ln(D:R)','y','ln(IDC)','column','Transfer Type:','row','Day ');
 g(1,2).set_order_options('color',{'crossB_crossY','crossB_wtY','wtB_crossY','wtB_wtY'});
 g(1,2).no_legend;
@@ -801,7 +965,7 @@ g(1,3) = gramm('x',Complete(1).All.logBYnormRatio,'y',Complete(1).All.logTKC,'co
     Complete(1).All.TKC>=2 & Complete(1).All.TKC~=500));
 g(1,3).facet_grid(Complete(1).All.day,[]);
 g(1,3).geom_point();
-g(1,3).set_title(["Rescue Cultures","(cis)"]);
+% g(1,3).set_title(["Rescue Cultures","(cis)"]);
 g(1,3).set_names('x','ln(D:R)','y','ln(IDC)','row','Day ','color','Coculture Pair');
 g(1,3).set_order_options('color',{'crossB_crossY','crossB_wtY','wtB_crossY','wtB_wtY'});
 
@@ -928,7 +1092,7 @@ g(1,1) = gramm('x',C.Plate1.day,'y',C.Plate1.TKCPerY,...
 g(1,1).facet_grid(C.Plate1.LW_Percent,[]);
 g(1,1).stat_summary('geom','line');
 g(1,1).geom_point();
-g(1,1).axe_property('Yscale','log');
+g(1,1).axe_property('Yscale','log','Ylim',[1E-8 5E-2]);
 g(1,1).set_title('cis Culture');
 g(1,1).set_names('x','Day','y',["Transconjugant CFU/","Yeast Count"],...
     'color','Coculture Pair','row','LW%','column',[]);
@@ -942,7 +1106,7 @@ g(1,2) = gramm('x',C.Plate1.day,'y',C.Plate1.TKCPerY,...
 g(1,2).facet_grid(C.Plate1.Perc_LW,[]);
 g(1,2).stat_summary('geom','line');
 g(1,2).geom_point();
-g(1,2).axe_property('Yscale','log');
+g(1,2).axe_property('Yscale','log','Ylim',[1E-8 5E-2]);
 g(1,2).set_title('trans Culture');
 g(1,2).set_names('x','Day','y',["Transconjugant CFU/","Yeast Count"],...
     'color','Coculture Pair','row','LW%','column',[]);
@@ -956,7 +1120,7 @@ g(1,3) = gramm('x',C.Plate1.day,'y',C.Plate1.TKCPerY,...
 g(1,3).facet_grid(C.Plate1.Perc_LW,[]);
 g(1,3).stat_summary('geom','line');
 g(1,3).geom_point();
-g(1,3).axe_property('Yscale','log');
+g(1,3).axe_property('Yscale','log','Ylim',[1E-8 5E-2]);
 g(1,3).set_title('trans Colonies');
 g(1,3).set_names('x','Day','y',["Transconjugant CFU/","Yeast Count"],...
     'color','Coculture Pair','row','LW%','column',[]);
@@ -1085,7 +1249,7 @@ Pair = {'crossB_crossY','crossB_wtY','wtB_crossY','wtB_wtY'};
         
         title(p,'Interpreter','none');
 
-        sgtitle('Bacteria co-existing with yeast events, day6 (all LW%)');
+%         sgtitle('Bacteria co-existing with yeast events, day6 (all LW%)');
         legend('Mannose-','Mannose+');
 
         
@@ -1118,7 +1282,7 @@ Pair = {'crossB_crossY','crossB_wtY','wtB_crossY','wtB_wtY'};
         
         title(p,'Interpreter','none');
 
-        sgtitle('Yeast event areas, day6 (all LW%)');
+%         sgtitle('Yeast event areas, day6 (all LW%)');
         legend('Mannose-','Mannose+');
 
     end
@@ -1205,7 +1369,7 @@ g.set_title('Donor-to-recipient ratios');
 g.draw();
 
 
-%% SF13: Colony Radial_Day6
+%% SF12: Colony Radial_Day6
 
 data = Complete(1).Plate14.ImageData;
 
@@ -1245,13 +1409,13 @@ g(1,3).set_order_options('color',{'crossB_crossY','crossB_wtY','wtB_crossY','wtB
 g(1,3).set_stat_options('alpha',0.001);
 g(1,3).set_line_options('base_size',2);
 
-g.set_title('Radial Signals, Day 6');
+% g.set_title('Radial Signals, Day 6');
 
 g.draw();
 
 
 
-%% SF15: Rescue batch culture growths
+%% SF14: Rescue batch culture growths
 
 clear g;
 figure();
@@ -1361,12 +1525,12 @@ g(1,4).set_line_options('base_size',0.5,'step_size',2,'styles',{'-',':'});
 g(1,4).no_legend();
 
 
-g.set_title('Growth: Rescue All Pairs');
+% g.set_title('Growth: Rescue All Pairs');
 
 g.draw();
 
 
-%% SF17: CRISPR Growth
+%% SF18: CRISPR Growth
 
 AllData.Plate1 = Complete(1).Plate15.TecanData;
 
@@ -1428,7 +1592,7 @@ g(1,2).set_line_options('base_size',0.5,'step_size',2,'styles',{'-',':'});
 g(1,2).no_legend();
 
 
-g.set_title('CRISPR Plate Growth (normalized)');
+% g.set_title('CRISPR Plate Growth (normalized)');
 
 g.draw();
 
@@ -1456,7 +1620,7 @@ g.set_title('CRISPR Yeast Growth (normalized)');
 
 g.draw();
 
-%% SI20: CRISPR Fold Plasmid loss Yeast
+%% SI19: CRISPR Fold Plasmid loss Yeast
 
 
 EndPoints.Plate1 = Complete(1).Plate15.TecanEndpoints;
@@ -1471,13 +1635,13 @@ g(1,1).facet_grid(EndPoints.Plate1.PercW,[]);
 g(1,1).stat_summary('geom','bar');
 g(1,1).geom_vline('xintercept',6.5);
 g(1,1).axe_property('Ylim',[-10 -.9]);
-g(1,1).set_title('Fold decrease in BFP-URA from Monoculture, 100% Ura');
+% g(1,1).set_title('Fold decrease in BFP-URA from Monoculture, 100% Ura');
 g(1,1).set_names('x','Day','y',["-Monoculture Control BFP","/ BFP"],'color','Coculture Pair','row','W%');
 g(1,1).set_order_options('row',[15 10 5 1],...
     'color',{'cutB_crisprY','nocutB_crisprY'});
 
 
-g.set_title('Comparing Fold-Loss of BFP-URA from Yeast Cocultures (no URA selection)');
+% g.set_title('Comparing Fold-Loss of BFP-URA from Yeast Cocultures (no URA selection)');
 
 g.draw();
 
@@ -1528,7 +1692,7 @@ g.draw();
 
 
 
-% Next up... data consolidation shit
+% Next up... data consolidation, statistical tests
 
 
 
